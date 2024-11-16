@@ -1,29 +1,64 @@
 from cell import Cell
-
-w = Cell(type="wall", color=None)
-n = Cell()
-e = Cell(type="empty", color=None)
-r = Cell(type="player", color="red")
-b = Cell(type="player", color="blue")
-g = Cell(type="player", color="green")
-R = Cell(type="goal", color="red")
-B = Cell(type="goal", color="blue")
-G = Cell(type="goal", color="green")
+from state import State
+import numpy as np
+import random
 
 
-def find_next_states(grid, available_moves):
+def is_finished(grid):
+    for cell in grid.flat:
+        if cell.type == "player" or cell.type == "mixed":
+            return False
+    return True
+
+
+def print_state(state):
+    print("\nCurrent State:")
+    print("Grid:")
+    print_grid(state.grid)
+    print("\nStatus:", state.status)
+
+    if state.previous:
+        print("\nPrevious State:")
+        print_grid(state.previous.grid, True)
+    else:
+        print("\nNo previous state available.")
+
+    if state.next_states and len(state.next_states) > 0:
+        print("\nNext States:")
+        for i, next_state in enumerate(state.next_states):
+            print(f"\tstate number {i+1}:")
+            print_grid(next_state.grid, True)
+    else:
+        print("\nNo next states available.")
+
+
+def find_next_states(state):
+    available_moves = all_available_moves(state.grid)
+    current_grid = state.grid
+
     next_states = []
     for move in available_moves:
-        new_grid = grid
-        print(f" ==> [move] = {move}")
-        print_grid(move_all_players_in_direction(grid=new_grid, direction=move))
+        # Directly move players and check the resulting grid
+        new_grid = move_all_players_in_direction(current_grid, move)
+
+        # Use status directly if possible to avoid recomputation
+        finished = is_finished(new_grid)
+
+        # Avoid constructing unnecessary intermediate objects
+        next_states.append(
+            State(grid=new_grid, status=finished, previous=state, action=move)
+        )
+
+    return next_states
 
 
-def print_grid(grid):
-    print("Grid: ")
-    for row in grid:
-        print("".join(str(cell) for cell in row))
-    print()
+def print_grid(grid, with_tab=False):
+    if with_tab:
+        for row in grid:
+            print("\t" + "".join(str(cell) for cell in row))
+    else:
+        for row in grid:
+            print("".join(str(cell) for cell in row))
 
 
 def get_adjacent_cell_in_direction(grid, player, direction):
@@ -68,16 +103,10 @@ def get_adjacent_cells(grid, player_position):
 
 def all_available_moves(grid):
     players_pos = find_all_players_position(grid)
-    players_moves = []
-
-    for player in players_pos:
-        players_moves.append(player_available_move(grid, player))
-
-    all_moves = set()
-
-    for moves in players_moves:
-        all_moves.update(moves)
-
+    random.shuffle(players_pos)
+    all_moves = {
+        move for player in players_pos for move in player_available_move(grid, player)
+    }
     return all_moves
 
 
@@ -85,16 +114,18 @@ def player_available_move(grid, player_position):
     x, y = player_position
     directions = []
 
-    if y > 0 and grid[y - 1][x].type not in ["wall", "player", "mixed"]:
+    max_y, max_x = grid.shape
+
+    if y > 0 and grid[y - 1, x].type not in {"wall", "player", "mixed"}:
         directions.append("up")
 
-    if y < len(grid) - 1 and grid[y + 1][x].type not in ["wall", "player", "mixed"]:
+    if y < max_y - 1 and grid[y + 1, x].type not in {"wall", "player", "mixed"}:
         directions.append("down")
 
-    if x > 0 and grid[y][x - 1].type not in ["wall", "player", "mixed"]:
+    if x > 0 and grid[y, x - 1].type not in {"wall", "player", "mixed"}:
         directions.append("left")
 
-    if x < len(grid[0]) - 1 and grid[y][x + 1].type not in ["wall", "player", "mixed"]:
+    if x < max_x - 1 and grid[y, x + 1].type not in {"wall", "player", "mixed"}:
         directions.append("right")
 
     return directions
@@ -102,13 +133,11 @@ def player_available_move(grid, player_position):
 
 def get_players(grid):
     players = []
-    for _, row in enumerate(grid):
-        for _, cell in enumerate(row):
-            if cell.type == "player":
-                players.append(cell)
-            if cell.type == "mixed":
-                players.append(cell.top_cell)
-    # print(f" ==> [players] = {players}")
+    for row in grid.flat:
+        if row.type == "player":
+            players.append(row)
+        elif row.type == "mixed":
+            players.append(row.top_cell)
     return players
 
 
@@ -124,20 +153,25 @@ def get_players_num(grid):
 
 def find_all_players_position(grid):
     players_positions = []
-    for y, row in enumerate(grid):
-        for x, cell in enumerate(row):
-            if cell.type in ["player", "mixed"]:
+    for y in range(grid.shape[0]):
+        for x in range(grid.shape[1]):
+            cell = grid[y, x]
+            if cell.type in {"player", "mixed"}:
                 players_positions.append((x, y))
-    return players_positions  # Return None if player not found
+    random.shuffle(players_positions)
+    return players_positions
 
 
 def find_one_player_position(grid, player_color):
-    for y, row in enumerate(grid):
-        for x, cell in enumerate(row):
-            if (cell.type == "player" and cell.color == player_color) or (
-                cell.type == "mixed" and cell.top_cell.color == player_color
-            ):
+    max_y, max_x = grid.shape
+    for y in range(max_y):
+        for x in range(max_x):
+            cell = grid[y, x]
+            if cell.type == "player" and cell.color == player_color:
                 return x, y
+            elif cell.type == "mixed" and cell.top_cell.color == player_color:
+                return x, y
+    return None
 
 
 def did_reach_the_goal(player, goal):
@@ -145,51 +179,54 @@ def did_reach_the_goal(player, goal):
 
 
 def move_one_step(grid, direction, player_color):
+    grid = np.array(grid)  # Ensure grid is a NumPy array
     player_pos = find_one_player_position(grid, player_color)
-    if not player_pos:
-        return False
+
+    if player_pos is None:  # No player found
+        return grid, False
 
     x, y = player_pos
-    new_x, new_y = x, y
 
-    if direction == "left":
-        new_x -= 1 if x > 0 else 0
-    elif direction == "right":
-        new_x += 1 if x < len(grid[0]) - 1 else 0
-    elif direction == "up":
-        new_y -= 1 if y > 0 else 0
-    elif direction == "down":
-        new_y += 1 if y < len(grid) - 1 else 0
-    else:
-        return False
+    # Movement deltas
+    dx, dy = 0, 0
+    if direction == "left" and x > 0:
+        dx = -1
+    elif direction == "right" and x < len(grid[0]) - 1:
+        dx = 1
+    elif direction == "up" and y > 0:
+        dy = -1
+    elif direction == "down" and y < len(grid) - 1:
+        dy = 1
 
-    if (
-        grid[new_y][new_x].type == "wall"
-        or grid[new_y][new_x].type == "player"
-        or grid[new_y][new_x].type == "mixed"
-    ):
-        return False
+    new_x, new_y = x + dx, y + dy
 
-    elif grid[y][x].type == "mixed":
+    # Target cell
+    target_cell = grid[new_y][new_x]
+
+    if target_cell.type in {"wall", "player", "mixed"}:
+        return grid, False
+
+    current_cell = grid[y][x]
+
+    if current_cell.type == "mixed":
         grid[new_y][new_x] = Cell(type="player", color=player_color)
-        grid[y][x] = Cell(type="goal", color=grid[y][x].color)
+        grid[y][x] = Cell(type="goal", color=current_cell.color)
 
-    elif grid[new_y][new_x].type == "goal":
-        if did_reach_the_goal(grid[y][x], grid[new_y][new_x]):
+    elif target_cell.type == "goal":
+        if did_reach_the_goal(current_cell, target_cell):
             grid[y][x] = Cell(type="empty", color=None)
             grid[new_y][new_x] = Cell(type="empty", color=None)
         else:
             grid[new_y][new_x] = Cell(
-                type="mixed",
-                color=grid[new_y][new_x].color,
-                top_cell=grid[y][x],
+                type="mixed", color=target_cell.color, top_cell=current_cell
             )
             grid[y][x] = Cell(type="empty", color=None)
 
-    else:
+    else:  # Normal movement
         grid[y][x] = Cell(type="empty", color=None)
         grid[new_y][new_x] = Cell(type="player", color=player_color)
-    return True
+
+    return grid, True
 
 
 def move_one_player(grid, direction, player_color):
@@ -259,9 +296,10 @@ def move_all_players_in_direction(grid, direction):
 
     for player in sorted_players:
         while True:
-            can_move_more = move_one_step(grid, direction, player.color)
-            if not can_move_more:
-                return grid
+            grid, bool = move_one_step(grid, direction, player.color)
+            if not bool:
+                break
+    return grid
 
 
 def remove_blocked_players(grid, players, direction):

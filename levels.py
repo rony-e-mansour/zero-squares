@@ -1,4 +1,5 @@
 from cell import Cell
+import numpy as np
 
 w = Cell(type="wall", color=None)
 n = Cell()
@@ -55,6 +56,18 @@ def generate_wall_with_empty(total_length, start_index, num_walls, start=w, end=
     return section[:total_length]
 
 
+# level test
+leveltest = [
+    [w, w, w, w, w, w, w],
+    [w, e, e, R, e, e, w],
+    [w, e, e, e, e, e, w],
+    [w, e, e, e, e, e, w],
+    [w, e, e, r, e, g, w],
+    [w, e, e, e, e, G, w],
+    [w, w, w, w, w, w, w],
+]
+
+
 # level 1
 level1 = [
     [w, w, w, w, w, w, w, w],
@@ -72,7 +85,7 @@ level2 = [
     [w, w, w, w, R, w, w, w],
     generate_empty_with_wall(8, 2, 3),
 ]
-level2[2][1] = r
+level2[1][2] = r
 
 # level 3
 level3 = [
@@ -243,4 +256,3 @@ level17[9][7] = B
 level17[6][5] = R
 
 level2 = level2
-
