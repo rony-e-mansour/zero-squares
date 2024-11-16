@@ -36,16 +36,15 @@ def BFS(init_state):
 
 
 def DFS(init_state):
-    stack = []  # Stack for DFS
-    path = []  # Path to the goal state
-    visited_states = set()  # Set to keep track of visited states
+    stack = []  
+    path = [] 
+    visited_states = set() 
     stack.append(init_state)
     visited_states.add(init_state)
 
     while stack:
         current_state = stack.pop()
 
-        # Check if the current state is the goal
         if current_state.status:
             path.append(current_state)
             while current_state.previous is not None:
@@ -54,7 +53,6 @@ def DFS(init_state):
             path.reverse()
             return path, len(visited_states)
 
-        # Generate the next states
         next_states = find_next_states(current_state)
         current_state.next_states = next_states
 
