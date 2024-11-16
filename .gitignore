@@ -3,6 +3,8 @@ tests.py
 venv/
 
 .vscode/
+*.json
+
 __pycache__/
 *.pyc
 *.pyo
