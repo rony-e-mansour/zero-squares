@@ -5,9 +5,19 @@ from state import *
 from levels import *
 from algo import *
 
-states = []
-grid = np.array(level16)
-pygame.init()
+
+# Algorithms:
+# manual
+# BFS
+# DFS
+#  change this var to BFS or DFS or leave it manual to play it by your self
+algo = "BFS"
+
+# Increase this value to increase the time between movements (in millisecond)
+time_between_moves = 300
+
+# chose a level to play (level1 -> level20)
+chosen_level = level20
 
 WIDTH, HEIGHT = 800, 600
 CELL_SIZE = 50
@@ -16,13 +26,28 @@ BLACK = (0, 0, 0)
 RED = (255, 50, 50)
 BLUE = (100, 100, 255)
 ORANGE = (255, 191, 0)
-GREEN = (59, 215, 145)
+GREEN = (59, 180, 170)
+PINK = (243, 120, 150)
 
+grid = np.array(chosen_level)
+
+pygame.init()
+
+clock = pygame.time.Clock()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 screen.fill(WHITE)
 pygame.display.set_caption("Zero Squares")
 
-clock = pygame.time.Clock()
+
+def render_path(path):
+    print(f"\nIt took ({len(path)}) step to solve the level\n")
+    screen.fill(WHITE)
+    for state in path:
+        screen.fill(WHITE)
+        pygame.time.delay(time_between_moves)
+        draw_grid(state.grid)
+
+    pygame.time.delay(time_between_moves * 2)
 
 
 def draw_grid(grid):
@@ -46,12 +71,16 @@ def draw_grid(grid):
                         else (
                             BLUE
                             if cell.color == "blue"
-                            else (ORANGE if cell.color == "orange" else GREEN)
+                            else (
+                                ORANGE
+                                if cell.color == "orange"
+                                else (PINK if cell.color == "pink" else GREEN)
+                            )
                         )
                     ),
                     rect,
                     0,
-                    10,
+                    5,
                 )
             elif cell.type == "goal":
                 pygame.draw.rect(screen, WHITE, rect)
@@ -63,12 +92,16 @@ def draw_grid(grid):
                         else (
                             BLUE
                             if cell.color == "blue"
-                            else (ORANGE if cell.color == "orange" else GREEN)
+                            else (
+                                ORANGE
+                                if cell.color == "orange"
+                                else (PINK if cell.color == "pink" else GREEN)
+                            )
                         )
                     ),
                     rect,
                     5,
-                    10,
+                    5,
                 )
             elif cell.type == "mixed":
                 pygame.draw.rect(
@@ -79,12 +112,16 @@ def draw_grid(grid):
                         else (
                             BLUE
                             if cell.top_cell.color == "blue"
-                            else (ORANGE if cell.top_cell.color == "orange" else GREEN)
+                            else (
+                                ORANGE
+                                if cell.top_cell.color == "orange"
+                                else (PINK if cell.top_cell.color == "pink" else GREEN)
+                            )
                         )
                     ),
                     rect,
                     0,
-                    15,
+                    10,
                 )
                 pygame.draw.rect(
                     screen,
@@ -94,12 +131,16 @@ def draw_grid(grid):
                         else (
                             BLUE
                             if cell.color == "blue"
-                            else (ORANGE if cell.color == "orange" else GREEN)
+                            else (
+                                ORANGE
+                                if cell.color == "orange"
+                                else (PINK if cell.color == "pink" else GREEN)
+                            )
                         )
                     ),
                     rect,
                     5,
-                    10,
+                    5,
                 )
 
     pygame.display.flip()
@@ -110,27 +151,27 @@ def handle_movement(state, direction):
     players = get_players(state.grid)
     sorted_players = sort_players_by_distance_from_edge(state.grid, players, direction)
     sorted_players = remove_blocked_players(state.grid, sorted_players, direction)
-    temp_state = State(state.grid)
+    new_state = State(state.grid)
     for player in sorted_players:
         while True:
             draw_grid(state.grid)
             pygame.time.delay(7)
-            temp_state.grid, bool = move_one_step(
-                temp_state.grid, direction, player.color
+            new_state.grid, bool = move_one_step(
+                new_state.grid, direction, player.color
             )
             if not bool:
                 break
         screen.fill(WHITE)
         pygame.time.delay(7)
-    return temp_state
-    # print_grid(state.grid)
+    return new_state
 
 
-def main(state, algo="manual"):
+def main(state, algo):
     current_state = state
     running = True
     states = []
     states.append(current_state)
+
     if algo == "manual":
         while running:
             for event in pygame.event.get():
@@ -166,30 +207,19 @@ def main(state, algo="manual"):
 
     elif algo == "BFS":
         path, len = BFS(init_state)
-        print(f" ==> [len] = {len}")
+        print(f"\nThe algorithm visit ({len})  state to solve the level\n")
         render_path(path)
 
     elif algo == "DFS":
         path, len = DFS(init_state)
-        print(f" ==> [len] = {len}")
+        print(f"\nThe algorithm visit ({len}) state to solve the level\n")
         render_path(path)
-    print(f" ==> [len] = {len}")
-    # render_path(path)
+
     pygame.quit()
     sys.exit()
-
-
-def render_path(path):
-    screen.fill(WHITE)
-    for state in path:
-        screen.fill(WHITE)
-        pygame.time.delay(400)
-        draw_grid(state.grid)
-    pygame.time.delay(400)
-    print(f" ==> [len(path)] = {len(path)}")
 
 
 init_state = State(grid=grid)
 
 if __name__ == "__main__":
-    main(init_state, "BFS")
+    main(init_state, algo)

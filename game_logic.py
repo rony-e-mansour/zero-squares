@@ -46,7 +46,7 @@ def find_next_states(state):
 
         # Avoid constructing unnecessary intermediate objects
         next_states.append(
-            State(grid=new_grid, status=finished, previous=state, action=move)
+            State(grid=new_grid, status=finished, previous=state)
         )
 
     return next_states

@@ -18,9 +18,18 @@
     ```bash
     pip install -r requirements.txt
     ```
+
+3. Run the game:
+    ```bash
+    python main.py
+    ```
+---
+
 ## Project Overview
 
 Zero Squares is a Python-based game designed by me -Rony Mansour- for Intelligent Search Algorithms course at DU. 
+
+---
 
 ## Project Structure
 
@@ -33,8 +42,10 @@ The project is organized into several files:
 - `levels.py`: Contains the representation of several phases as two-dimensional arrays
 - `main.py`: Contains drawing functions and user input control
 
+---
 
-
-## Getting Started
-
-To run the game, navigate to the project root directory and execute:
+## Guid
+in the begin of `main.py` there is three value you can change:
+- `algo`: manual, BFS, or DFS
+- `time_between_moves`: Increase this value to increase the time between movements (in millisecond)
+- `chosen_level`: chose a level to play (from level1 to level20)

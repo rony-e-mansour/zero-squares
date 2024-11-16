@@ -1,5 +1,6 @@
 from cell import Cell
 import numpy as np
+from game_logic import *
 
 w = Cell(type="wall", color=None)
 n = Cell()
@@ -8,10 +9,18 @@ r = Cell(type="player", color="red")
 b = Cell(type="player", color="blue")
 g = Cell(type="player", color="green")
 o = Cell(type="player", color="orange")
+p = Cell(type="player", color="pink")
 R = Cell(type="goal", color="red")
 B = Cell(type="goal", color="blue")
 G = Cell(type="goal", color="green")
 O = Cell(type="goal", color="orange")
+P = Cell(type="goal", color="pink")
+oB = Cell(type="mixed", color="blue", top_cell=Cell(type="player", color="orange"))
+rO = Cell(type="mixed", color="orange", top_cell=Cell(type="player", color="red"))
+bR = Cell(type="mixed", color="red", top_cell=Cell(type="player", color="blue"))
+gB = Cell(type="mixed", color="blue", top_cell=Cell(type="player", color="green"))
+gP = Cell(type="mixed", color="pink", top_cell=Cell(type="player", color="green"))
+oG = Cell(type="mixed", color="green", top_cell=Cell(type="player", color="orange"))
 
 
 def generate_h_wall(length):
@@ -54,18 +63,6 @@ def generate_wall_with_empty(total_length, start_index, num_walls, start=w, end=
         section.append(end)
 
     return section[:total_length]
-
-
-# level test
-leveltest = [
-    [w, w, w, w, w, w, w],
-    [w, e, e, R, e, e, w],
-    [w, e, e, e, e, e, w],
-    [w, e, e, e, e, e, w],
-    [w, e, e, r, e, g, w],
-    [w, e, e, e, e, G, w],
-    [w, w, w, w, w, w, w],
-]
 
 
 # level 1
@@ -194,9 +191,23 @@ level9[6][2] = b
 level9[2][7] = B
 level9[4][9] = R
 
-# TODO level10 (not created)
+# level 10
+level10 = [
+    generate_empty_with_wall(12, 1, 8, e, e),
+    [e, w, w, e, e, e, e, e, e, w, w, e],
+    [w, w, e, e, w, e, e, w, e, e, w, w],
+    [w, e, e, w, e, e, e, e, w, e, e, w],
+    [w, e, e, e, e, w, e, e, w, w, e, w],
+    [w, e, w, e, w, w, e, e, e, w, e, w],
+    [w, e, e, e, w, e, e, e, e, e, e, w],
+    generate_h_wall(12),
+]
+level10[5][1] = r
+level10[5][10] = b
+level10[3][5] = R
+level10[2][6] = B
 
-# level 9
+# level 11
 level11 = [
     generate_empty_with_wall(8, 0, 3, e, e),
     generate_wall_with_empty(8, 1, 1),
@@ -211,7 +222,76 @@ level11[3][1] = B
 level11[3][3] = R
 level11[1][2] = O
 
-# TODO skip level from 10 to 15
+# level 12
+level12 = [
+    generate_empty_with_wall(7, 1, 5, e, 2),
+    generate_wall_with_empty(7, 2, 3),
+    generate_wall_with_empty(7, 0, 5, w, w),
+    [w, e, e, e, w, e, w],
+    [w, e, e, e, w, e, w],
+    [w, w, e, e, w, e, w],
+    [e, w, w, e, w, w, w],
+    [e, e, w, w, w, e, e],
+]
+level12[3][5] = r
+level12[4][5] = o
+level12[5][5] = b
+level12[2][1] = R
+level12[1][4] = O
+level12[5][2] = B
+
+
+# level 13
+level13 = [
+    [e, e, w, w, w, w, w, e, e, e, e],
+    [w, w, w, e, e, e, w, e, e, e, e],
+    [w, e, w, e, e, e, w, w, w, w, w],
+    [w, e, w, e, e, e, e, w, e, e, w],
+    [w, e, w, w, e, w, w, w, e, e, w],
+    [w, e, e, e, e, e, e, e, e, w, w],
+    [w, e, e, w, e, e, e, e, w, w, e],
+    [w, w, w, w, w, w, w, w, w, e, e],
+]
+level13[1][3] = b
+level13[1][4] = r
+level13[1][5] = o
+level13[2][5] = B
+level13[3][8] = R
+level13[6][4] = O
+
+# level 14
+level14 = [
+    generate_h_wall(7),
+    [w, e, w, e, w, e, w],
+    generate_empty_with_wall(7, 0, 0, w, w),
+    generate_empty_with_wall(7, 0, 0, w, w),
+    generate_empty_with_wall(7, 0, 1, w, w),
+    generate_empty_with_wall(7, 0, 1, e, w),
+    generate_wall_with_empty(7, 0, 0, e, w),
+]
+level14[1][1] = oB
+level14[1][3] = rO
+level14[1][5] = bR
+
+
+# level 15
+level15 = [
+    generate_wall_with_empty(8, 0, 0, e, w),
+    generate_empty_with_wall(8, 0, 1, e, w),
+    [e, w, e, e, e, w, e, w],
+    [w, w, e, w, w, w, e, w],
+    generate_empty_with_wall(8, 0, 0, w, w),
+    [w, e, w, w, w, w, e, w],
+    [w, e, w, e, e, w, e, w],
+    generate_empty_with_wall(8, 0, 0, w, w),
+    generate_h_wall(8),
+]
+level15[4][2] = o
+level15[4][3] = r
+level15[4][4] = b
+level15[2][3] = B
+level15[6][4] = O
+level15[6][6] = R
 
 # level16
 level16 = [
@@ -232,7 +312,7 @@ level16[3][5] = G
 level16[4][4] = B
 level16[5][3] = R
 
-# level16
+# level17
 level17 = [
     generate_wall_with_empty(9, 6, 2, w, e),
     [w, e, e, e, e, e, w, w, w],
@@ -255,4 +335,64 @@ level17[6][3] = G
 level17[9][7] = B
 level17[6][5] = R
 
-level2 = level2
+# level 18
+level18 = [
+    generate_wall_with_empty(10, 7, 2, w, e),
+    [w, e, e, e, w, e, e, w, e, e],
+    generate_empty_with_wall(10, 6, 1, w, e),
+    [w, e, e, e, w, e, e, w, e, e],
+    [w, e, w, e, w, w, w, w, w, w],
+    generate_empty_with_wall(10, 0, 1, w, w),
+    [w, e, e, w, e, e, w, e, e, w],
+    generate_h_wall(10),
+]
+level18[6][7] = r
+level18[5][7] = b
+level18[5][8] = o
+level18[1][5] = R
+level18[4][1] = O
+level18[3][5] = G
+level18[6][8] = gB
+
+
+# level 19
+level19 = [
+    [e, w, w, w, e, e, e, e],
+    [w, w, e, w, w, e, e, e],
+    [w, e, e, e, w, e, e, e],
+    [w, w, w, e, w, w, w, w],
+    [w, e, e, e, e, w, w, w],
+    [w, w, e, e, e, e, e, w],
+    [w, e, e, w, e, e, e, w],
+    [w, w, w, w, e, w, w, w],
+    [e, e, e, w, e, e, e, w],
+    [e, e, e, w, e, e, e, w],
+    [e, e, e, w, w, e, w, w],
+    [e, e, e, e, w, w, w, e],
+]
+level19[4][4] = o
+level19[6][1] = r
+level19[4][1] = b
+level19[6][6] = g
+level19[1][2] = O
+level19[6][4] = R
+level19[8][5] = B
+level19[10][5] = G
+
+
+# level 20
+level20 = [
+    [e, e, e, w, w, w, w, e, e],
+    [w, w, w, w, e, e, w, w, w],
+    generate_empty_with_wall(9, 0, 0, w, w),
+    [w, e, e, w, e, e, w, e, w],
+    generate_h_wall(9),
+]
+level20[1][4] = r
+level20[2][3] = b
+level20[2][2] = p
+level20[1][5] = O
+level20[3][4] = R
+level20[2][1] = B
+level20[3][2] = gP
+level20[3][7] = oG

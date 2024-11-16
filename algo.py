@@ -30,8 +30,7 @@ def BFS(init_state):
             if state not in visited_states:
                 q.put(state)
                 visited_states.add(state)
-            else:
-                print('visited!')
+
                 
     return [init_state], len(visited_states)
 
@@ -63,8 +62,6 @@ def DFS(init_state):
             if state not in visited_states:
                 stack.append(state)
                 visited_states.add(state)
-            else:
-                print("visited!")
 
     return [init_state], len(visited_states)
 

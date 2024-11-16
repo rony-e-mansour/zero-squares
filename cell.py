@@ -22,6 +22,9 @@ class Cell:
                 self.top_cell.color == "green" and self.color == "blue"
             ):
                 return "🟨"
+            elif self.color == "blue" and self.top_cell.color == "orange":
+            
+                return "🟨"
             else:
                 return "❌"
 
@@ -40,6 +43,8 @@ class Cell:
                 return "🟩"
             elif self.color == "orange":
                 return "🟧"
+            elif self.color == "pink":
+                return "💟"
             else:
                 return "❌"
 
@@ -52,6 +57,8 @@ class Cell:
                 return "🟢"
             elif self.color == "orange":
                 return "🟠"
+            elif self.color == "pink":
+                return "💗"
             else:
                 return "❌"
 
