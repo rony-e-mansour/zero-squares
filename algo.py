@@ -1,19 +1,21 @@
 from cell import Cell
 from state import State
-import numpy as np
-from queue import Queue
 from game_logic import *
+import heapq
+from itertools import count
 
-def BFS(init_state):
-    print("\nBFS Started...")
-    q = Queue()
+
+def UCS(initial_state):
+    print("\nUCS Started...")
+    priority_queue = []
     path = []
+    counter = count()
     visited_states = set()
-    q.put(init_state)
-    visited_states.add(init_state)
 
-    while not q.empty():
-        current_state = q.get()
+    heapq.heappush(priority_queue, (0, next(counter), initial_state))
+
+    while priority_queue:
+        cumulative_cost, _, current_state = heapq.heappop(priority_queue)
 
         if current_state.status:
             path.append(current_state)
@@ -23,12 +25,17 @@ def BFS(init_state):
             path.reverse()
             return path, len(visited_states)
 
+        if current_state in visited_states:
+            continue
+
+        visited_states.add(current_state)
+
         next_states = find_next_states(current_state)
-        current_state.next_states = next_states
 
-        for state in current_state.next_states:
-            if state not in visited_states:
-                q.put(state)
-                visited_states.add(state)
+        if next_states:
+            for next_state in next_states:
+                cost = cumulative_cost + next_state.calcCost()
+                next_state.cost = cost
+                heapq.heappush(priority_queue, (cost, next(counter), next_state))
 
-    return [init_state], len(visited_states)
+    return None
