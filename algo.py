@@ -3,9 +3,6 @@ from state import State
 import numpy as np
 from queue import Queue
 from game_logic import *
-import heapq
-from itertools import count
-
 
 def BFS(init_state):
     print("\nBFS Started...")
@@ -35,5 +32,3 @@ def BFS(init_state):
                 visited_states.add(state)
 
     return [init_state], len(visited_states)
-
-
