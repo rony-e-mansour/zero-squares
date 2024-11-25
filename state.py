@@ -1,9 +1,10 @@
 class State:
-    def __init__(self, grid, status=False, previous=None, next_states=None):
+    def __init__(self, grid, status=False, previous=None, next_states=None, cost=0):
         self.grid = grid
         self.status = status
         self.previous = previous
         self.next_states = next_states
+        self.cost = cost
 
     def __hash__(self):
         return hash(tuple(tuple(cell.type for cell in row) for row in self.grid))
@@ -15,3 +16,6 @@ class State:
             for row in range(len(self.grid))
             for col in range(len(self.grid[row]))
         )
+
+    def calcCost(self):
+        return self.cost + 1

@@ -86,14 +86,14 @@ level2[1][2] = r
 
 # level 3
 level3 = [
-    generate_empty_with_wall(13, 1, 11),
-    [e, e, w, e, e, e, e, e, e, e, e, e, w],
-    [w, w, w, e, e, w, w, w, w, w, w, e, w],
-    [w, e, e, e, e, e, R, e, e, e, w, e, w],
-    [w, e, w, e, e, e, e, e, e, e, w, e, w],
-    [w, e, e, e, e, e, e, e, e, e, e, e, w],
-    generate_wall_with_empty(13, 3, 8),
-    generate_empty_with_wall(13, 2, 11),
+    generate_empty_with_wall(12, 1, 11),
+    [e, e, w, e, e, e, e, e, e, e, e, w],
+    [w, w, w, e, e, w, w, w, w, w, e, w],
+    [w, e, e, e, e, e, R, e, e, w, e, w],
+    [w, e, w, e, e, e, e, e, e, w, e, w],
+    [w, e, e, e, e, e, e, e, e, e, e, w],
+    generate_wall_with_empty(12, 3, 7),
+    generate_empty_with_wall(12, 2, 11),
 ]
 level3[1][3] = r
 
@@ -396,3 +396,26 @@ level20[3][4] = R
 level20[2][1] = B
 level20[3][2] = gP
 level20[3][7] = oG
+
+levels = [
+    level1,
+    level2,
+    level3,
+    level4,
+    level5,
+    level6,
+    level7,
+    level8,
+    level9,
+    level10,
+    level11,
+    level12,
+    level13,
+    level14,
+    level15,
+    level16,
+    level17,
+    level18,
+    level19,
+    level20,
+]

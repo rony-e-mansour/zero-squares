@@ -45,9 +45,7 @@ def find_next_states(state):
         finished = is_finished(new_grid)
 
         # Avoid constructing unnecessary intermediate objects
-        next_states.append(
-            State(grid=new_grid, status=finished, previous=state)
-        )
+        next_states.append(State(grid=new_grid, status=finished, previous=state))
 
     return next_states
 
@@ -148,7 +146,7 @@ def get_players_num(grid):
             if cell.type in ["player", "mixed"]:
                 players_num += 1
 
-    return players_num or Exception("No Players Found")
+    return players_num
 
 
 def find_all_players_position(grid):
