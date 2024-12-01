@@ -372,7 +372,7 @@ def main(state, algo):
             path, visited_states = DFS(init_state)
             moves = len(path) - 1
         elif algo == "UCS":
-            path, visited_states = UCS(init_state)
+            path, visited_states = A_star(init_state)
             moves = len(path) - 1
         elif algo == "DFS-Rec":
             path, visited_states = DFS_Rec(init_state)
@@ -419,3 +419,5 @@ if __name__ == "__main__":
     results= main(init_state, selected_algo)
 
     write_results_to_file(results)
+
+    

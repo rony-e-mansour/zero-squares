@@ -126,3 +126,40 @@ def DFS_Rec(init_state):
         return None
 
     return recursive_DFS(init_state, [], set())
+
+
+# =========== UCS ===========
+def A_star(init_state):
+    print("\nUCS Started...")
+    priority_queue = []
+    path = []
+    counter = count()
+    visited_states = set()
+    heapq.heappush(priority_queue, (0, next(counter), init_state))
+
+    while priority_queue:
+        cumulative_cost, _, current_state = heapq.heappop(priority_queue)
+
+        if current_state.status:
+            path.append(current_state)
+            while current_state.previous is not None:
+                current_state = current_state.previous
+                path.append(current_state)
+            path.reverse()
+            print(f' ==> [len(visited_states)] = {len(visited_states)}')
+            return path, len(visited_states)
+
+        if current_state in visited_states:
+            continue
+
+        visited_states.add(current_state)
+
+        next_states = find_next_states(current_state)
+
+        if next_states:
+            for next_state in next_states:
+                # cost = cumulative_cost + next_state.calcCost()
+                next_state.cost = calculate_heuristic(grid=next_state.grid)
+                heapq.heappush(priority_queue, (next_state.cost, next(counter), next_state))
+
+    return [init_state], len(visited_states)

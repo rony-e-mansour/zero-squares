@@ -332,7 +332,6 @@ def remove_blocked_players(grid, players, direction):
 def calculate_heuristic(grid):
     grid = np.array(grid)
     players = get_players(grid)
-    print(f" ==> [players] = {players}")
     manhatin_dist = 0
     for player in players:
         player_pos = find_one_player_position(grid=grid, player_color=player.color)
@@ -341,5 +340,4 @@ def calculate_heuristic(grid):
             player_pos[1] - goal_pos[1]
         )
     manhatin_dist += len(players)
-    print(f" ==> [manhatin_dist] = {manhatin_dist}")
     return manhatin_dist
