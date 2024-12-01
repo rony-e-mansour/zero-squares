@@ -6,21 +6,13 @@ from levels import *
 from algo import *
 import time
 import os
-
-# Algorithms:
-# manual
-# BFS
-# DFS
-#  change this var to BFS or DFS or leave it manual to play it by your self
-algo = "manual"
+import matplotlib.pyplot as plt
 
 # Increase this value to increase the time between movements (in millisecond)
-time_between_moves = 200
+time_between_moves = 100
 
-# chose a level to play (level1 -> level20)
-chosen_level = level16
-
-WIDTH, HEIGHT = 800, 700
+i = 0
+WIDTH, HEIGHT = 800, 750
 CELL_SIZE = 50
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -113,9 +105,14 @@ def handle_algorithm_selection():
             pygame.Rect(WIDTH // 2 - 6, HEIGHT // 2 - 76, 120, 40),
         ),
         (
-            "UCS",
+            "DFS-Rec",
             pygame.Rect(WIDTH // 2 + 160, HEIGHT // 2 - 80, 120, 40),
             pygame.Rect(WIDTH // 2 + 164, HEIGHT // 2 - 76, 120, 40),
+        ),
+        (
+            "UCS",
+            pygame.Rect(WIDTH // 2 - 350, HEIGHT // 2 + 10, 120, 40),
+            pygame.Rect(WIDTH // 2 - 346, HEIGHT // 2 + 14, 120, 40),
         ),
     ]
 
@@ -180,6 +177,7 @@ def handle_level_selection():
 
 def render_path(path):
     print(f"\nIt took ({len(path)}) step to solve the level\n")
+
     screen.fill(WHITE)
     for state in path:
         screen.fill(WHITE)
@@ -190,7 +188,22 @@ def render_path(path):
 
 
 def draw_grid(grid):
-
+    global i
+    i = i + 1
+    titlefont = pygame.font.Font(None, 40)
+    text = f"Level {selected_level}"
+    leveltitle = titlefont.render(text, True, BLACK)
+    screen.blit(leveltitle, (WIDTH // 2 - leveltitle.get_width() // 2, 20))
+    player_num = get_players_num(grid)
+    playerfont = pygame.font.Font(None, 30)
+    plyerstext = f"Players Number: {player_num}"
+    playertitle = playerfont.render(plyerstext, True, BLACK)
+    screen.blit(playertitle, (WIDTH // 2 - playertitle.get_width() // 2, HEIGHT - 60))
+    movestext = f"Moves number: {i}"
+    movesfont = pygame.font.Font(None, 25)
+    movestitle = movesfont.render(movestext, True, BLACK)
+    if selected_algo != "Manual":
+        screen.blit(movestitle, (WIDTH // 2 - movestitle.get_width() // 2, HEIGHT - 35))
     offset_x = (WIDTH - len(grid[0]) * CELL_SIZE) // 2
     offset_y = (HEIGHT - len(grid) * CELL_SIZE) // 2
 
@@ -309,6 +322,7 @@ def main(state, algo):
     current_state = state
     running = True
     states = []
+    results = []
     states.append(current_state)
 
     if algo == "Manual":
@@ -348,40 +362,60 @@ def main(state, algo):
             draw_grid(current_state.grid)
             clock.tick(60)
 
-    elif algo == "BFS" or algo == "DFS" or algo == "UCS":
+    else:
         start_time = time.time()
 
         if algo == "BFS":
-            path, len = BFS(init_state)
-            print(f"\nThe algorithm visit ({len}) state to solve the level\n")
-
+            path, visited_states = BFS(init_state)
+            moves = len(path) - 1
         elif algo == "DFS":
-            path, len = DFS(init_state)
-            print(f"\nThe algorithm visit ({len}) state to solve the level\n")
-
+            path, visited_states = DFS(init_state)
+            moves = len(path) - 1
         elif algo == "UCS":
-            path, len = UCS(init_state)
-            print(f"\nThe algorithm visit ({len}) state to solve the level\n")
+            path, visited_states = UCS(init_state)
+            moves = len(path) - 1
+        elif algo == "DFS-Rec":
+            path, visited_states = DFS_Rec(init_state)
+            moves = len(path) - 1
 
         end_time = time.time()
         elapsed_time = end_time - start_time
-        print(f"Algorithm took {elapsed_time:.5f} seconds to solve the level")
+
+        results.append(
+            {
+                "algo": algo,
+                "level": selected_level,
+                "time": elapsed_time,
+                "visited_states": visited_states,
+                "path": len(path),
+            }
+        )
 
         render_path(path)
 
-    pygame.quit()
-    sys.exit()
+    return results
+
+
+def write_results_to_file(results):
+    with open("results.md", "a") as f:
+        for result in results:
+            f.write(
+                f"|  **{result['algo']}** | {result['time']:.8f} | {result['visited_states']} | {result['path']} |\n"
+            )
+    print("Results have been written to results.txt")
 
 
 if __name__ == "__main__":
     selected_level = handle_level_selection()
     selected_algo = handle_algorithm_selection()
     # print(f" ==> [selected_algo] = {selected_algo}")
-    print(f" ==> [selected_level] = {selected_level}")
+    # print(f" ==> [selected_level] = {selected_level}")
     grid = levels[selected_level - 1]
     grid = np.array(grid)
     init_state = State(grid=grid)
     # screen.fill(WHITE)
     pygame.display.flip()
 
-    main(init_state, selected_algo)
+    results= main(init_state, selected_algo)
+
+    write_results_to_file(results)

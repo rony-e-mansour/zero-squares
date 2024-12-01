@@ -38,13 +38,10 @@ def find_next_states(state):
 
     next_states = []
     for move in available_moves:
-        # Directly move players and check the resulting grid
         new_grid = move_all_players_in_direction(current_grid, move)
 
-        # Use status directly if possible to avoid recomputation
         finished = is_finished(new_grid)
 
-        # Avoid constructing unnecessary intermediate objects
         next_states.append(State(grid=new_grid, status=finished, previous=state))
 
     return next_states
@@ -76,7 +73,6 @@ def get_adjacent_cell_in_direction(grid, player, direction):
         if x < len(grid[0]) - 1:
             adjacent_cell = Cell(grid[y][x + 1].type, grid[y][x + 1].color)
 
-    # print(f" ==> [adjacent_cell] = {adjacent_cell.type, player}")
     return adjacent_cell
 
 
@@ -172,20 +168,31 @@ def find_one_player_position(grid, player_color):
     return None
 
 
+def find_one_goal_position(grid, goal_color):
+    max_y, max_x = grid.shape
+    for y in range(max_y):
+        for x in range(max_x):
+            cell = grid[y, x]
+            if cell.type == "goal" and cell.color == goal_color:
+                return x, y
+            elif cell.type == "mixed" and cell.color == goal_color:
+                return x, y
+    return None
+
+
 def did_reach_the_goal(player, goal):
     return player.color == goal.color
 
 
 def move_one_step(grid, direction, player_color):
-    grid = np.array(grid)  # Ensure grid is a NumPy array
+    grid = np.array(grid)
     player_pos = find_one_player_position(grid, player_color)
 
-    if player_pos is None:  # No player found
+    if player_pos is None:
         return grid, False
 
     x, y = player_pos
 
-    # Movement deltas
     dx, dy = 0, 0
     if direction == "left" and x > 0:
         dx = -1
@@ -198,7 +205,6 @@ def move_one_step(grid, direction, player_color):
 
     new_x, new_y = x + dx, y + dy
 
-    # Target cell
     target_cell = grid[new_y][new_x]
 
     if target_cell.type in {"wall", "player", "mixed"}:
@@ -220,7 +226,7 @@ def move_one_step(grid, direction, player_color):
             )
             grid[y][x] = Cell(type="empty", color=None)
 
-    else:  # Normal movement
+    else:
         grid[y][x] = Cell(type="empty", color=None)
         grid[new_y][new_x] = Cell(type="player", color=player_color)
 
@@ -321,3 +327,19 @@ def remove_blocked_players(grid, players, direction):
                 unblocked_players.append(player)
 
     return unblocked_players
+
+
+def calculate_heuristic(grid):
+    grid = np.array(grid)
+    players = get_players(grid)
+    print(f" ==> [players] = {players}")
+    manhatin_dist = 0
+    for player in players:
+        player_pos = find_one_player_position(grid=grid, player_color=player.color)
+        goal_pos = find_one_goal_position(grid=grid, goal_color=player.color)
+        manhatin_dist += abs(player_pos[0] - goal_pos[0]) + abs(
+            player_pos[1] - goal_pos[1]
+        )
+    manhatin_dist += len(players)
+    print(f" ==> [manhatin_dist] = {manhatin_dist}")
+    return manhatin_dist
